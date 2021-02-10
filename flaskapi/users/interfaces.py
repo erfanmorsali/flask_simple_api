@@ -29,3 +29,15 @@ class UserInterface(ABC):
     @abstractmethod
     def add_user_to_database(self,user):
         pass
+
+    @abstractmethod
+    def generate_hash_password(self,password):
+        pass
+
+    @abstractmethod
+    def check_user_password(self,user,password):
+        pass    
+
+    @abstractmethod
+    def generate_json_web_token(self,id):
+        pass
