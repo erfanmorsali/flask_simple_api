@@ -11,7 +11,7 @@ class PostInterface(ABC):
         pass
     
     @abstractmethod
-    def create_post(self,title,content,user_id):
+    def create_post(self,title,content,author):
         pass
 
     @abstractmethod

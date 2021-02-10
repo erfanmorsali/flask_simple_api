@@ -6,6 +6,7 @@ class UserSerializer(Schema):
     id = fields.Int()
     username = fields.Str()
     email = fields.Email()
+    is_admin = fields.Boolean()
     posts = fields.List(fields.Nested("PostSerializer",exclude=("author",)))
 
 

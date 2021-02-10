@@ -6,7 +6,8 @@ from flaskapi import api
 from .errors import UserErrors
 from marshmallow import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_raw_jwt
-from .decorators import admin_required
+from flaskapi.decorators import admin_required,admin_or_self_required
+
 
 users = Blueprint("users",__name__)
 user_service = UserService()
@@ -22,34 +23,33 @@ class AllUsersView(Resource):
         return jsonify(serializer)
 
 class UserDetailView(Resource):
+    @jwt_required
+    @admin_or_self_required
     def get(self,id):
         user = user_service.get_user_by_id(id)
-        if user is None:
-            return {"message" : user_errors.user_not_found_by_id(id)} , 404
         serializer = UserSerializer().dump(user)
         return jsonify(serializer)
     
+    @jwt_required
+    @admin_or_self_required
     def put(self,id):
-        user = user_service.get_user_by_id(id)
-        if user is None:
-            return {"message" : user_errors.user_not_found_by_id(id)} ,404
         try:
+            user = user_service.get_user_by_id(id)
             serializer = UpdateUserSerializer().load(request.json)
             user_service.update_user(id,serializer)
             return {"message" : "user successfully updated"} , 202
         except ValidationError as err:
             return {"message" : err.messages} , 400
 
-
+    @jwt_required
+    @admin_or_self_required
     def delete(self,id):
         user = user_service.get_user_by_id(id)
-        if user is None:
-            return {"message" : user_errors.user_not_found_by_id(id)} , 404
         user_service.delete_user(user)
-        return {"message" : "user successfully deleted"} , 200
+        return {"message" : "user successfully deleted"} , 202
 
 
-class CreateUserView(Resource):
+class RegisterUserView(Resource):
     def post(self):
         try:
             serializer = CreateUserSerializer().load(request.json)
@@ -74,5 +74,5 @@ class Login(Resource):
 
 api.add_resource(AllUsersView,"/all_users")
 api.add_resource(UserDetailView,"/user_by_id/<int:id>")
-api.add_resource(CreateUserView,"/create_user")
+api.add_resource(RegisterUserView,"/register")
 api.add_resource(Login,"/login")
